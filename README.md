@@ -9,4 +9,4 @@ in the output directory. Currently the format of this file is a simple CSV where
 the first value in every row is a type constructor and all subsequent value in
 the row are variable that have been used with that type constructor.
 
-See `test/Spec.hs` for an example of usage.
+See `test/Spec.hs` and `example/` for usage examples.

@@ -1,0 +1,18 @@
+cabal-version: 1.12
+
+name:                example
+version:             0.1.0.0
+license:             PublicDomain
+author:              Joshua Price
+maintainer:          elderephemera@gmail.com
+build-type:          Simple
+
+library
+  exposed-modules:
+    Foo.Bar
+  build-depends:
+    base >= 4.12 && < 4.13,
+    ghc-name-catcher    
+  hs-source-dirs: src
+  default-language: Haskell2010
+  ghc-options: -fplugin=GhcNameCatcher -fplugin-opt=GhcNameCatcher:./out
