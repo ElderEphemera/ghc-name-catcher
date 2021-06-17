@@ -1,0 +1,47 @@
+cabal-version: 1.12
+
+name:           ghc-name-catcher
+version:        0.1.0.0
+synopsis:       A GHC plugin for extracting names from code
+description:    Please see the README on GitHub at <https://github.com/ElderEphemera/ghc-name-catcher#readme>
+category:       Compiler Plugin
+homepage:       https://github.com/ElderEphemera/ghc-name-catcher#readme
+bug-reports:    https://github.com/ElderEphemera/ghc-name-catcher/issues
+author:         Joshua Price
+maintainer:     elderephemera@gmail.com
+copyright:      Copyright (c) 2021, Joshua Price
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+  README.md
+
+source-repository head
+  type: git
+  location: https://github.com/ElderEphemera/ghc-name-catcher
+
+library
+  exposed-modules:
+      GhcNameCatcher
+  hs-source-dirs: src
+  build-depends:
+    base >= 4.7 && < 5,
+    containers >= 0.6.0 && < 0.7,
+    directory >= 1.3.3 && < 1.4,
+    filepath >= 1.4.2 && < 1.5,
+    ghc >= 8.6 && < 8.10,
+    syb >= 0.7 && < 0.8,
+    transformers >= 0.5.6 && < 0.6
+  default-language: Haskell2010
+  ghc-options: -Wall
+
+test-suite ghc-name-catcher-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs: test
+  build-depends:
+    base >=4.7 && <5,
+    HUnit >= 1.6.2 && < 1.7,
+    ghc-name-catcher
+  default-language: Haskell2010
+  ghc-options: -Wall -Werror
