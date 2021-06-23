@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module GhcNameCatcher (plugin) where
 
 import Control.Monad.Trans.Writer.CPS
@@ -10,10 +12,17 @@ import qualified Data.Set as S
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>), (<.>))
 
+#if __GLASGOW_HASKELL__ < 900
 import qualified GhcPlugins as P
 import TcRnTypes (TcGblEnv, TcM, tcg_binds, tcg_mod)
 import TcRnMonad (failWithM)
-import TyCoRep (Type(TyConApp))
+import TyCoRep (Type(TyConApp, ForAllTy))
+#else
+import qualified GHC.Plugins as P
+import GHC.Tc.Types (TcGblEnv, TcM, tcg_binds, tcg_mod)
+import GHC.Data.IOEnv (failWithM)
+import GHC.Core.TyCo.Rep (Type(TyConApp, ForAllTy))
+#endif
 
 --------------------------------------------------------------------------------
 -- Main definitions
@@ -36,8 +45,8 @@ process [] _ = failWithM
 
 logVar :: P.Located P.Id -> Writer IdBag (P.Located P.Id)
 logVar ident
-  | TyConApp tc _ <- P.varType (P.unLoc ident)
-  , P.RealSrcSpan _ <- P.getLoc ident
+  | Just tc <- getTyCon . P.varType $ P.unLoc ident
+  , P.RealSrcSpan {} <- P.getLoc ident
   = ident <$ tell (ident +:: tc)
   | otherwise = pure ident
 
@@ -65,3 +74,12 @@ instance Semigroup IdBag where
 
 instance Monoid IdBag where
   mempty = IdBag mempty
+
+--------------------------------------------------------------------------------
+-- Helpers
+--------------------------------------------------------------------------------
+
+getTyCon :: Type -> Maybe P.TyCon
+getTyCon (TyConApp tc _) = Just tc
+getTyCon (ForAllTy _ t) = getTyCon t
+getTyCon _ = Nothing
