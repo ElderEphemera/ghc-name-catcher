@@ -22,7 +22,7 @@ source-repository head
 
 library
   exposed-modules:
-      GhcNameCatcher
+    GhcNameCatcher
   hs-source-dirs: src
   build-depends:
     base >= 4.7 && < 4.15,
