@@ -3,18 +3,19 @@
 
 module Main where
 
+import Control.Monad (unless)
 import Data.List (intercalate)
-
-import Test.HUnit
+import System.Exit (die)
 
 -- TODO: Write a more comprehensive test suite
 main :: IO ()
 main = do
   csv <- readFile "out/Main.csv"
-  runTestTTAndExit $
-    "Main.csv"
-    ~: csv
-    ~=? shouldBe
+  unless (csv == shouldBe) . die $ unlines
+    [ "Generated file does not match expected result"
+    , "Generated: " ++ show csv
+    , "Expected:  " ++ show shouldBe
+    ]
 
 shouldBe :: String
 shouldBe = unlines $ map (intercalate ",")

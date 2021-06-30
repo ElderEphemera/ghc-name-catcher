@@ -41,7 +41,6 @@ test-suite ghc-name-catcher-test
   hs-source-dirs: test
   build-depends:
     base >=4.7 && <5,
-    HUnit >= 1.6.2 && < 1.7,
     ghc-name-catcher
   default-language: Haskell2010
   ghc-options: -Wall -Werror
