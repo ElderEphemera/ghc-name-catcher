@@ -2,6 +2,7 @@
 
 module GhcNameCatcher (plugin) where
 
+import Control.Monad (filterM)
 import Control.Monad.Trans.Writer.CPS
 
 import Data.Generics (everywhereM, mkM)
@@ -9,19 +10,22 @@ import Data.List (intercalate)
 import qualified Data.Map as M
 import qualified Data.Set as S
 
-import System.Directory (createDirectoryIfMissing)
-import System.FilePath ((</>), (<.>))
+import System.Directory
+  (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, listDirectory)
+import System.FilePath (takeExtension, (</>), (<.>))
 
 #if __GLASGOW_HASKELL__ < 900
 import qualified GhcPlugins as P
 import TcRnTypes (TcGblEnv, TcM, tcg_binds, tcg_mod)
 import TcRnMonad (failWithM)
 import TyCoRep (Type(TyConApp, ForAllTy))
+import Fingerprint (fingerprintFingerprints, getFileHash)
 #else
 import qualified GHC.Plugins as P
 import GHC.Tc.Types (TcGblEnv, TcM, tcg_binds, tcg_mod)
 import GHC.Data.IOEnv (failWithM)
 import GHC.Core.TyCo.Rep (Type(TyConApp, ForAllTy))
+import GHC.Fingerprint (fingerprintFingerprints, getFileHash)
 #endif
 
 --------------------------------------------------------------------------------
@@ -31,7 +35,19 @@ import GHC.Core.TyCo.Rep (Type(TyConApp, ForAllTy))
 plugin :: P.Plugin
 plugin = P.defaultPlugin
   { P.typeCheckResultAction = \opts _summary -> process opts
-  , P.pluginRecompile = P.purePlugin }
+  , P.pluginRecompile = recompile }
+
+recompile :: [P.CommandLineOption] -> IO P.PluginRecompile
+recompile (outDir:_) = do
+  exists <- doesDirectoryExist outDir
+  if not exists then pure P.ForceRecompile
+  else do
+    contents <- map (outDir </>) <$> listDirectory outDir
+    files <- filterM doesFileExist contents
+    let csvFiles = filter ((".csv" ==) . takeExtension) files
+    fingerprints <- traverse getFileHash csvFiles
+    pure . P.MaybeRecompile $ fingerprintFingerprints fingerprints
+recompile [] = pure P.ForceRecompile
 
 process :: [P.CommandLineOption] -> TcGblEnv -> TcM TcGblEnv
 process (outDir:_) env = (env <$) . P.liftIO $ do
