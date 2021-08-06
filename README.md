@@ -10,3 +10,8 @@ the first value in every row is a type constructor and all subsequent values in
 the row are variables that have been used with that type constructor.
 
 See `test/Spec.hs` and `example/` for usage examples.
+
+## Supported GHC Versions
+
+GHC versions 8.6.3-9.0.1 are supported. If you need another version feel free to
+open an issue.
