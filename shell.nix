@@ -11,6 +11,6 @@ let
 in pkgs.mkShell {
   packages = [
     ghcs."ghc-${ghcVersion}"
-    pkgs.haskellPackages.cabal-install
+    ghcs.cabal-install
   ];
 }
